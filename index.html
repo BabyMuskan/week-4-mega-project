@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataDash - Interactive Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div id="toast" class="toast"></div>
+    <aside class="sidebar">
+        <h2>DataDash</h2>
+
+        <nav>
+            <a href="#" class="active">📊 Dashboard</a>
+            <a href="#">👥 Users</a>
+            <a href="#">⚙️ Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+
+        <header>
+            <h1>Dashboard</h1>
+            <p>Interactive Data Overview</p>
+        </header>
+
+        <!-- Filter -->
+        <section class="filter-section">
+            <label for="filter">Filter Data:</label>
+
+            <select id="filter">
+                <option value="all">All Data</option>
+                <option value="recent">Recent Data</option>
+                <option value="older">Older Data</option>
+            </select>
+         <div id="status"></div>
+<div id="loading" class="loading" style="display: none;">
+    Loading data...
+</div>
+<button id="retryBtn" style="display: none;">Retry</button>
+  <button id="applyFilter">Apply Filter</button>
+        </section>
+
+        <!-- Metric Cards -->
+        <section class="cards">
+
+            <div class="card">
+                <h3>Total Records</h3>
+                <p id="totalRecords">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Active Sessions</h3>
+                <p id="activeSessions">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Growth Rate</h3>
+                <p id="growthRate">0%</p>
+            </div>
+
+        </section>
+
+        <!-- Chart Area -->
+      <section class="chart-container">
+    <h2>Data Overview</h2>
+    <canvas id="myChart"></canvas>
+</section>  
+  </main>
+<!-- Login Modal UI for Week 3 -->
+<div class="auth-modal-overlay">
+  <div class="auth-card">
+    <div class="lock-icon">🔒</div>
+    <h2>Welcome Back</h2>
+    <p>Please sign in to access your dashboard</p>
+    
+    <form id="loginForm">
+      <div class="input-group">
+        <input type="email" id="email" placeholder="Email Address" required />
+</div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn-primary">Secure Sign In</button>
+    </form>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
