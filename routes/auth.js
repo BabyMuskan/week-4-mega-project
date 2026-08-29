@@ -1,21 +1,18 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const user = require("../models/user");
 
 const router = express.Router();
 
-// ===============================
 // REGISTER
-// ===============================
-
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
-        message: "Name, email and password are required"
+        message: "Please provide name, email and password"
       });
     }
 
@@ -37,27 +34,28 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({
       message: "User registered successfully",
-      userId: user._id
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
     });
-
   } catch (error) {
-    res.status(400).json({
-      message: error.message
+    console.error(error);
+    res.status(500).json({
+      message: "Server error"
     });
   }
 });
 
-// ===============================
 // LOGIN
-// ===============================
-
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "Email and password are required"
+        message: "Please provide email and password"
       });
     }
 
@@ -69,10 +67,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -82,11 +77,12 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign(
       {
-        userId: user._id
+        id: user._id,
+        email: user.email
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h"
+        expiresIn: "1d"
       }
     );
 
@@ -94,36 +90,30 @@ router.post("/login", async (req, res) => {
       message: "Login successful",
       token
     });
-
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: error.message
+      message: "Server error"
     });
   }
 });
 
-// ===============================
 // PROFILE
-// ===============================
-
 router.get("/profile", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
-        message: "No token provided"
+        message: "Not authorized. Token required."
       });
     }
 
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -135,8 +125,8 @@ router.get("/profile", async (req, res) => {
       message: "Profile fetched successfully",
       user
     });
-
   } catch (error) {
+    console.error(error);
     res.status(401).json({
       message: "Invalid or expired token"
     });
