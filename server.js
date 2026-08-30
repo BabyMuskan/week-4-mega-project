@@ -17,11 +17,6 @@ app.get('/', (req, res) => {
 
 // IMPORTANT: Railway ke dynamic PORT aur '0.0.0.0' host configuration
 const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, '0.0.0.0', () => {
-   const PORT = process.env.PORT || 5000;
-
-// Notice backticks (``) around the string:
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
