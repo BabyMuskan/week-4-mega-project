@@ -1,3 +1,9 @@
+const cors = require('cors'); // 1. CORS require karein
+
+// ... aapka baqi Express app code ...
+
+app.use(cors()); // 2. app.use(express.json()) se pehle ye line likhein
+app.use(express.json());
 const express = require('express');
 const connectDB = require('./db');
 require('dotenv').config();

@@ -1,256 +1,92 @@
-const toast = document.getElementById("toast");
+// 1. Live Railway Backend URL Configuration
+const BASE_URL = 'https://week-4-mega-project-production.up.railway.app';
 
-function showToast(message) {
-    toast.textContent = message;
-    toast.style.display = "block";
+// DOM Elements (Apne HTML IDs ke hisab se modify kar lein)
+document.addEventListener('DOMContentLoaded', () => {
+    fetchData(); // Page load hote hi data bring karein
+});
 
-    setTimeout(() => {
-        toast.style.display = "none";
-    }, 3000);
-}
-
-const totalRecords = document.getElementById("totalRecords");
-const activeSessions = document.getElementById("activeSessions");
-const growthRate = document.getElementById("growthRate");
-
-const filter = document.getElementById("filter");
-const applyFilter = document.getElementById("applyFilter");
-
-const status = document.getElementById("status");
-const retryBtn = document.getElementById("retryBtn");
-const loading = document.getElementById("loading");
-
-let allData = [];
-let myChart;
-
-// ===============================
-// LOADING STATE
-// ===============================
-
-function showLoading(show) {
-    if (loading) {
-        loading.style.display = show ? "block" : "none";
+// 2. GET Request: Backend se Data Fetch aur Display Karna
+async function fetchData() {
+    try {
+        const response = await fetch(`${BASE_URL}/api/data`); // Apne backend ka route name check karein
+        if (!response.ok) {
+            throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Fetched Data from Live Database:', data);
+        
+        // Data ko DOM / Table / Chart mein Render karein
+        renderDataToUI(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
     }
 }
 
-// ===============================
-// FETCH API DATA
-// ===============================
-
-async function fetchData() {
-
-    showLoading(true);
-    status.textContent = "";
-    retryBtn.style.display = "none";
-
+// 3. POST Request: Naya Data MongoDB / Backend par Send Karna
+async function addData(newItemData) {
     try {
-        const response = await fetch(
-            "https://jsonplaceholder.typicode.com/users"
-        );
+        const response = await fetch(`${BASE_URL}/api/data`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newItemData)
+        });
 
         if (!response.ok) {
-            throw new Error("Failed to fetch data");
+            throw new Error(`Failed to save data. Status: ${response.status}`);
         }
 
-        allData = await response.json();
+        const result = await response.json();
+        console.log('Data added successfully:', result);
 
-        status.textContent = "Data loaded successfully.";
-
-        showToast("Data loaded successfully!");
-
-        updateDashboard(allData);
-
+        // UI reload karein taaki naya item screen par show ho jaye
+        fetchData();
     } catch (error) {
-
-        status.textContent =
-            "Unable to load data. Please try again.";
-
-        showToast("Unable to load data. Please try again.");
-
-        totalRecords.textContent = "—";
-        activeSessions.textContent = "—";
-        growthRate.textContent = "—";
-
-        retryBtn.style.display = "block";
-
-    } finally {
-        showLoading(false);
+        console.error('Error sending data:', error);
     }
 }
 
-// ===============================
-// UPDATE DASHBOARD
-// ===============================
+// 4. DELETE Request: Data Remove Karna
+async function deleteData(id) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/data/${id}`, {
+            method: 'DELETE'
+        });
 
-function updateDashboard(data) {
-
-    const cleanData = data.filter(
-        user => user && user.id
-    );
-
-    totalRecords.textContent = cleanData.length;
-
-    activeSessions.textContent =
-        Math.floor(cleanData.length * 0.7);
-
-    growthRate.textContent =
-        cleanData.length > 5 ? "+14.5%" : "+5.2%";
-
-    createChart(cleanData);
-}
-
-// ===============================
-// CREATE / UPDATE CHART
-// ===============================
-
-function createChart(data) {
-
-    const ctx = document.getElementById("myChart");
-
-    if (myChart) {
-        myChart.destroy();
-    }
-
-    const labels = data.map(user => user.name);
-    const values = data.map(user => user.id * 10);
-
-    myChart = new Chart(ctx, {
-        type: "bar",
-
-        data: {
-            labels: labels,
-
-            datasets: [{
-                label: "Records",
-                data: values,
-                borderWidth: 1
-            }]
-        },
-
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
+        if (!response.ok) {
+            throw new Error(`Failed to delete data. Status: ${response.status}`);
         }
+
+        console.log(`Item with ID ${id} deleted successfully`);
+        fetchData(); // Refresh UI list
+    } catch (error) {
+        console.error('Error deleting data:', error);
+    }
+}
+
+// 5. Helper Function: Screen/DOM par Data Render Karna
+function renderDataToUI(items) {
+    const container = document.getElementById('data-container'); // Apne HTML element ki ID yahan dein
+    if (!container) return;
+
+    container.innerHTML = ''; // Container clear karein
+
+    if (items.length === 0) {
+        container.innerHTML = '<p>No records found.</p>';
+        return;
+    }
+
+    items.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item-card';
+        itemDiv.innerHTML = `
+            <h3>${item.title || item.name || 'Item'}</h3>
+            <p>${item.description || ''}</p>
+            <button onclick="deleteData('${item._id}')">Delete</button>
+        `;
+        container.appendChild(itemDiv);
     });
 }
-
-// ===============================
-// FILTER
-// ===============================
-
-applyFilter.addEventListener("click", function () {
-
-    const selectedFilter = filter.value;
-
-    let filteredData;
-
-    if (selectedFilter === "all") {
-        filteredData = allData;
-
-    } else if (selectedFilter === "recent") {
-        filteredData = allData.slice(0, 5);
-
-    } else {
-        filteredData = allData.slice(5);
-    }
-
-    updateDashboard(filteredData);
-
-    showToast("Filter applied successfully!");
-});
-
-// ===============================
-// RETRY
-// ===============================
-
-retryBtn.addEventListener("click", function () {
-    fetchData();
-});
-
-// ===============================
-// LOGIN
-// ===============================
-
-const loginForm = document.getElementById("loginForm");
-
-if (loginForm) {
-
-    loginForm.addEventListener("submit", async (e) => {
-
-        e.preventDefault();
-
-        const emailInput =
-            document.getElementById("email");
-
-        const passwordInput =
-            document.getElementById("password");
-
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-
-        // Empty form validation
-        if (!email || !password) {
-            showToast("Please enter email and password.");
-            return;
-        }
-
-        try {
-
-            const response = await fetch(
-                "https://week-4-mega-project-production.up.railway.app/api/auth/login"
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        email,
-                        password
-                    })
-                }
-            );
-
-            const data = await response.json();
-
-            // Wrong email/password
-            if (!response.ok) {
-                showToast(
-                    data.message || "Invalid email or password."
-                );
-                return;
-            }
-
-            // Save JWT token
-            localStorage.setItem("token", data.token);
-
-            showToast("Login successful!");
-
-            const modal =
-                document.querySelector(".auth-modal-overlay");
-
-            if (modal) {
-                modal.style.display = "none";
-            }
-
-        } catch (error) {
-
-            showToast(
-                "Unable to connect to server. Please try again."
-            );
-        }
-    });
-}
-
-// ===============================
-// START DASHBOARD
-// ===============================
-
-fetchData();
