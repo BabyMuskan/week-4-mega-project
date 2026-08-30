@@ -3,13 +3,15 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db');
 const Metric = require('./models/Metric');
-const authRoutes = require(`./routes/auth`);
-const protect = require("./middleware/authMiddleware");
+const authRoutes = require('./routes/auth');
+const protect = require('./middleware/authMiddleware');
+
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(cors());
+
 app.use("/api/auth", authRoutes);
 
 // Connect to Database
@@ -73,5 +75,15 @@ app.delete('/api/metrics/:id', protect, async (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
+
+// Start local server only outside production
+const PORT = process.env.PORT || 5000;
+
+if (process.env.NODE_ENV !== "production") {
+    app.listen(PORT, () => {
+        console.log(Server running on port ${PORT});
+    });
+}
+
 // Export app for Vercel
 module.exports = app;
