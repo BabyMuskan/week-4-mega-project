@@ -73,10 +73,5 @@ app.delete('/api/metrics/:id', protect, async (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
-
-// Start Server
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Export app for Vercel
+module.exports = app;
