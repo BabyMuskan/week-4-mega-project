@@ -71,7 +71,7 @@ app.delete('/api/metrics/:id', protect, async (req, res) => {
 
 // Test route
 app.get('/', (req, res) => {
-    res.send('Week 3 API Server is Running!');
+    res.sendFile(__dirname + '/index.html');
 });
 
 // Start Server
