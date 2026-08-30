@@ -203,7 +203,7 @@ if (loginForm) {
         try {
 
             const response = await fetch(
-                "/api/auth/login",
+                "https://week-4-mega-project-production.up.railway.app/api/auth/login"
                 {
                     method: "POST",
 
