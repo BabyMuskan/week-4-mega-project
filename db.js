@@ -17,7 +17,7 @@ const connectDB = async () => {
     // 3. Connect to MongoDB Atlas
     const conn = await mongoose.connect(process.env.MONGO_URI);
 
-    console.log(MongoDB Connected Successfully: ${conn.connection.host});
+    console.log(`MongoDB Connected Successfully: ${conn.connection.host}`);
   } catch (err) {
     // 4. Handle connection errors cleanly without throwing unhandled exceptions
     console.error('Database connection failed:', err.message);
