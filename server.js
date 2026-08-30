@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const protect = require('./middleware/authMiddleware');
 
 const app = express();
+app.use(express.static(__dirname));
 
 // Middleware
 app.use(express.json());
