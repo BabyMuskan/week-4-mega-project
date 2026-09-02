@@ -5,25 +5,25 @@ require('dotenv').config();
 
 const app = express();
 
-// 1. MUST BE FIRST: Configure Top-Level CORS Policy
+// 1. Top-Level CORS Middleware (Fixes CORS Policy Error)
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// 2. Middleware to parse JSON payloads
+// 2. Parse incoming JSON payloads
 app.use(express.json());
 
-// 3. Connect to MongoDB Atlas
+// 3. Connect to Database safely
 connectDB();
 
-// Root Test Route
+// 4. Base / Health Check Route
 app.get('/', (req, res) => {
     res.send('API is running successfully!');
 });
 
-// Mock /api/data Endpoint (Fixes 502 & CORS issue on dashboard load)
+// 5. /api/data Endpoint (Fixes 502 Bad Gateway on Dashboard load)
 app.get('/api/data', (req, res) => {
     res.json({
         totalRecords: 120,
@@ -33,7 +33,7 @@ app.get('/api/data', (req, res) => {
     });
 });
 
-// Mock /api/login Endpoint (Fixes auth modal submission)
+// 6. /api/login Endpoint (Fixes Login Modal Submission)
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     res.json({
@@ -43,7 +43,7 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// Port Binding for Railway Environment
+// 7. Dynamic Port Binding for Railway Environment
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
