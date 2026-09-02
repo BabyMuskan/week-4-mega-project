@@ -9,7 +9,7 @@ const connectDB = async () => {
 
     if (!process.env.MONGO_URI) {
       console.warn('WARNING: MONGO_URI is missing in Environment Variables!');
-      return; // process.exit(1) hata diya taake server crash na ho
+      return;
     }
 
     const conn = await mongoose.connect(process.env.MONGO_URI);
