@@ -1,92 +1,71 @@
-// 1. Live Railway Backend URL Configuration
-const BASE_URL = 'https://week-4-mega-project-production.up.railway.app';
+var API_URL = "https://week-4-mega-project-production.up.railway.app";
 
-// DOM Elements (Apne HTML IDs ke hisab se modify kar lein)
-document.addEventListener('DOMContentLoaded', () => {
-    fetchData(); // Page load hote hi data bring karein
-});
-
-// 2. GET Request: Backend se Data Fetch aur Display Karna
 async function fetchData() {
+    var loadingEl = document.getElementById("loading");
+    var statusEl = document.getElementById("status");
+    
+    if (loadingEl) loadingEl.style.display = "block";
+
     try {
-        const response = await fetch(`${BASE_URL}/api/data`); // Apne backend ka route name check karein
-        if (!response.ok) {
-            throw new Error(`HTTP Error! Status: ${response.status}`);
-        }
+        var response = await fetch(API_URL + "/api/data");
         
-        const data = await response.json();
-        console.log('Fetched Data from Live Database:', data);
-        
-        // Data ko DOM / Table / Chart mein Render karein
-        renderDataToUI(data);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-}
-
-// 3. POST Request: Naya Data MongoDB / Backend par Send Karna
-async function addData(newItemData) {
-    try {
-        const response = await fetch(`${BASE_URL}/api/data`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newItemData)
-        });
-
         if (!response.ok) {
-            throw new Error(`Failed to save data. Status: ${response.status}`);
+            throw new Error("HTTP Error! Status: " + response.status);
         }
 
-        const result = await response.json();
-        console.log('Data added successfully:', result);
+        var data = await response.json();
+        console.log("Fetched Data:", data);
 
-        // UI reload karein taaki naya item screen par show ho jaye
-        fetchData();
-    } catch (error) {
-        console.error('Error sending data:', error);
-    }
-}
-
-// 4. DELETE Request: Data Remove Karna
-async function deleteData(id) {
-    try {
-        const response = await fetch(`${BASE_URL}/api/data/${id}`, {
-            method: 'DELETE'
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to delete data. Status: ${response.status}`);
+        if (document.getElementById("totalRecords")) {
+            document.getElementById("totalRecords").innerText = data.totalRecords || 0;
+        }
+        if (document.getElementById("activeSessions")) {
+            document.getElementById("activeSessions").innerText = data.activeSessions || 0;
+        }
+        if (document.getElementById("growthRate")) {
+            document.getElementById("growthRate").innerText = data.growthRate || "0%";
         }
 
-        console.log(`Item with ID ${id} deleted successfully`);
-        fetchData(); // Refresh UI list
+        if (statusEl) statusEl.innerText = "Data loaded successfully!";
     } catch (error) {
-        console.error('Error deleting data:', error);
+        console.error("Dashboard Fetch Error:", error);
+        if (statusEl) statusEl.innerText = "Failed to load data from server.";
+    } finally {
+        if (loadingEl) loadingEl.style.display = "none";
     }
 }
 
-// 5. Helper Function: Screen/DOM par Data Render Karna
-function renderDataToUI(items) {
-    const container = document.getElementById('data-container'); // Apne HTML element ki ID yahan dein
-    if (!container) return;
+document.addEventListener("DOMContentLoaded", function() {
+    fetchData();
 
-    container.innerHTML = ''; // Container clear karein
+    var loginForm = document.getElementById("loginForm");
+    if (loginForm) {
+        loginForm.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("password").value;
 
-    if (items.length === 0) {
-        container.innerHTML = '<p>No records found.</p>';
-        return;
+            try {
+                var res = await fetch(API_URL + "/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+
+                var result = await res.json();
+
+                if (res.ok) {
+                    alert("Login Successful!");
+                    var modal = document.querySelector(".auth-modal-overlay");
+                    if (modal) modal.style.display = "none";
+                } else {
+                    alert(result.message || "Login Failed");
+                }
+            } catch (err) {
+                console.error("Login Error:", err);
+                alert("Server connection failed during login.");
+            }
+        });
     }
-
-    items.forEach(item => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'item-card';
-        itemDiv.innerHTML = `
-            <h3>${item.title || item.name || 'Item'}</h3>
-            <p>${item.description || ''}</p>
-            <button onclick="deleteData('${item._id}')">Delete</button>
-        `;
-        container.appendChild(itemDiv);
-    });
-}
+});

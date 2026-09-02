@@ -1,23 +1,17 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
-  try {
-    if (mongoose.connection.readyState === 1) {
-      console.log('MongoDB is already connected.');
-      return;
+    try {
+        if (!process.env.MONGO_URI) {
+            console.log("MONGO_URI not found in environment variables. Running without DB.");
+            return;
+        }
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log("MongoDB Connected Successfully!");
+    } catch (error) {
+        console.error("MongoDB Connection Error:", error.message);
+        // Do not crash the application process
     }
-
-    if (!process.env.MONGO_URI) {
-      console.warn('WARNING: MONGO_URI is missing in Environment Variables!');
-      return;
-    }
-
-    const conn = await mongoose.connect(process.env.MONGO_URI);
-    // Backticks (``) lazmi use karein:
-    console.log(`MongoDB Connected Successfully: ${conn.connection.host}`);
-  } catch (err) {
-    console.error('Database connection failed:', err.message);
-  }
 };
 
 module.exports = connectDB;
