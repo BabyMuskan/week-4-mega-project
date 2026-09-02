@@ -5,16 +5,31 @@ require('dotenv').config();
 
 const app = express();
 
-// Database Connection
+// Connect Database
 connectDB();
 
-// Middlewares
-app.use(cors());
+// CORS for local Live Server
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
-// Routes
+// Root test route
 app.get('/', (req, res) => {
     res.send('API is running successfully!');
+});
+
+// Mock /api/data endpoint to fix 502 Bad Gateway
+app.get('/api/data', (req, res) => {
+    res.json({ message: "Data fetched successfully!", status: "success" });
+});
+
+// Login endpoint (Agar aap ke paas auth route hai)
+app.post('/api/login', (req, res) => {
+    res.json({ message: "Login successful", token: "sample-jwt-token" });
 });
 
 const PORT = process.env.PORT || 5000;
