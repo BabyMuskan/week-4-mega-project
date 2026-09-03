@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api/data";
+const API_BASE_URL = "https://week-4-mega-project-production-61cc.up.railway.app";
 
 let currentPage = 1;
 const limit = 5;
@@ -7,7 +7,7 @@ let currentSearch = "";
 // 1. Backend API se Data Fetch Karne Ka Function
 async function loadDashboardData(page = 1, search = "") {
     try {
-        const url = API_BASE_URL + "?page=" + page + "&limit=" + limit + "&search=" + encodeURIComponent(search);
+       const url = API_BASE_URL + "/api/data?page=" + page + "&limit=" + limit + "&search=" + search;
         const response = await fetch(url);
         
         if (!response.ok) {
