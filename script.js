@@ -1,4 +1,4 @@
-var API_URL = "https://week-4-mega-project-production.up.railway.app";
+var API_URL = "https://week-4-mega-project-production-c8b9.up.railway.app";
 
 async function fetchData() {
     var loadingEl = document.getElementById("loading");

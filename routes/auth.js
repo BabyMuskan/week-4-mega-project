@@ -5,7 +5,7 @@ const User = require("../models/user");
 
 const router = express.Router();
 
-// REGISTER
+// 1. REGISTER
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -17,7 +17,6 @@ router.post("/register", async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
       return res.status(400).json({
         message: "User already exists"
@@ -41,14 +40,12 @@ router.post("/register", async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server error"
-    });
+    console.error("Register Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// LOGIN
+// 2. LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -60,7 +57,6 @@ router.post("/login", async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(401).json({
         message: "Invalid email or password"
@@ -68,7 +64,6 @@ router.post("/login", async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return res.status(401).json({
         message: "Invalid email or password"
@@ -76,14 +71,9 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email
-      },
+      { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "1d"
-      }
+      { expiresIn: "1d" }
     );
 
     res.json({
@@ -91,18 +81,15 @@ router.post("/login", async (req, res) => {
       token
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server error"
-    });
+    console.error("Login Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// PROFILE
+// 3. GET PROFILE
 router.get("/profile", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
-
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         message: "Not authorized. Token required."
@@ -110,15 +97,11 @@ router.get("/profile", async (req, res) => {
     }
 
     const token = authHeader.split(" ")[1];
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decoded.id).select("-password");
-
     if (!user) {
-      return res.status(404).json({
-        message: "User not found"
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.json({
@@ -126,10 +109,84 @@ router.get("/profile", async (req, res) => {
       user
     });
   } catch (error) {
-    console.error(error);
-    res.status(401).json({
-      message: "Invalid or expired token"
+    console.error("Get Profile Error:", error);
+    res.status(401).json({ message: "Invalid or expired token" });
+  }
+});
+
+// 4. UPDATE PROFILE (Phase 2 Requirement)
+router.put("/profile/update", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Not authorized. Token required." });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const { name, email } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ message: "Please provide name and email." });
+    }
+
+    // Check if email belongs to another user
+    const existingUser = await User.findOne({ email, _id: { $ne: decoded.id } });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email is already in use." });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      decoded.id,
+      { name, email },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    res.json({
+      message: "Profile updated successfully",
+      user: updatedUser
     });
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 5. CHANGE PASSWORD (Phase 2 Requirement)
+router.put("/profile/change-password", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Not authorized. Token required." });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Please provide old and new passwords." });
+    }
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verify old password
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Hash and update new password
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Change Password Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
