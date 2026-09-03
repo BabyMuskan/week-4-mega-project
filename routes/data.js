@@ -1,5 +1,5 @@
 const express = require("express");
-const User = require("../models/user"); // Check karain model path sahi ho
+const User = require("../models/User"); // Check karain model path sahi ho
 const router = express.Router();
 
 // Route path SIRF "/" hona chahiye
