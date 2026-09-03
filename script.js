@@ -1,71 +1,86 @@
-var API_URL = "https://week-4-mega-project-production-c8b9.up.railway.app";
+const API_BASE_URL = "http://localhost:5000/api/data";
 
-async function fetchData() {
-    var loadingEl = document.getElementById("loading");
-    var statusEl = document.getElementById("status");
-    
-    if (loadingEl) loadingEl.style.display = "block";
+let currentPage = 1;
+const limit = 5;
+let currentSearch = "";
 
+// 1. Backend API se Data Fetch Karne Ka Function
+async function loadDashboardData(page = 1, search = "") {
     try {
-        var response = await fetch(API_URL + "/api/data");
+        const url = API_BASE_URL + "?page=" + page + "&limit=" + limit + "&search=" + encodeURIComponent(search);
+        const response = await fetch(url);
         
         if (!response.ok) {
-            throw new Error("HTTP Error! Status: " + response.status);
+            throw new Error("HTTP Error Status: " + response.status);
         }
 
-        var data = await response.json();
-        console.log("Fetched Data:", data);
+        const data = await response.json();
+        
+        // UI Render Karein
+        renderTableData(data.items);
+        renderPaginationUI(data.currentPage, data.totalPages);
 
-        if (document.getElementById("totalRecords")) {
-            document.getElementById("totalRecords").innerText = data.totalRecords || 0;
-        }
-        if (document.getElementById("activeSessions")) {
-            document.getElementById("activeSessions").innerText = data.activeSessions || 0;
-        }
-        if (document.getElementById("growthRate")) {
-            document.getElementById("growthRate").innerText = data.growthRate || "0%";
-        }
-
-        if (statusEl) statusEl.innerText = "Data loaded successfully!";
     } catch (error) {
-        console.error("Dashboard Fetch Error:", error);
-        if (statusEl) statusEl.innerText = "Failed to load data from server.";
-    } finally {
-        if (loadingEl) loadingEl.style.display = "none";
+        console.error("Dashboard Data Fetch Error:", error);
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    fetchData();
+// 2. Data Ko HTML Table Mein Display Karein
+function renderTableData(items) {
+    const tableBody = document.getElementById("tableBody");
+    if (!tableBody) return;
 
-    var loginForm = document.getElementById("loginForm");
-    if (loginForm) {
-        loginForm.addEventListener("submit", async function(e) {
-            e.preventDefault();
-            
-            var email = document.getElementById("email").value;
-            var password = document.getElementById("password").value;
+    tableBody.innerHTML = "";
 
-            try {
-                var res = await fetch(API_URL + "/api/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: email, password: password })
-                });
-
-                var result = await res.json();
-
-                if (res.ok) {
-                    alert("Login Successful!");
-                    var modal = document.querySelector(".auth-modal-overlay");
-                    if (modal) modal.style.display = "none";
-                } else {
-                    alert(result.message || "Login Failed");
-                }
-            } catch (err) {
-                console.error("Login Error:", err);
-                alert("Server connection failed during login.");
-            }
-        });
+    if (!items || items.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3" class="text-center">No records found</td></tr>';
+        return;
     }
+
+    items.forEach(function(item) {
+        const row = document.createElement("tr");
+        const itemId = item._id || item.id || "-";
+        const itemName = item.name || "-";
+        const itemEmail = item.email || "-";
+
+        row.innerHTML = '<td>' + itemId + '</td><td>' + itemName + '</td><td>' + itemEmail + '</td>';
+        tableBody.appendChild(row);
+    });
+}
+
+// 3. Pagination Controls Update Karein
+function renderPaginationUI(page, totalPages) {
+    currentPage = page;
+    const pageIndicator = document.getElementById("pageIndicator");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    if (pageIndicator) {
+        pageIndicator.innerText = "Page " + page + " of " + (totalPages || 1);
+    }
+
+    if (prevBtn) prevBtn.disabled = page <= 1;
+    if (nextBtn) nextBtn.disabled = page >= totalPages;
+}
+
+// 4. Next & Previous Buttons Setup
+document.getElementById("prevBtn")?.addEventListener("click", function() {
+    if (currentPage > 1) {
+        loadDashboardData(currentPage - 1, currentSearch);
+    }
+});
+
+document.getElementById("nextBtn")?.addEventListener("click", function() {
+    loadDashboardData(currentPage + 1, currentSearch);
+});
+
+// 5. Search Bar Filter Setup
+document.getElementById("searchInput")?.addEventListener("input", function(e) {
+    currentSearch = e.target.value.trim();
+    loadDashboardData(1, currentSearch);
+});
+
+// Page load hone par initial data call
+document.addEventListener("DOMContentLoaded", function() {
+    loadDashboardData(1, "");
 });

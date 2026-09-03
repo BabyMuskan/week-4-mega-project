@@ -21,9 +21,11 @@ app.use(express.json());
 // Database connection
 connectDB().catch(err => console.log("DB Warning:", err.message));
 
-// 2. Routes Mounting (Yeh Hissa Missing Tha)
+// 2. Routes Mounting
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes); 
+
+// Base Root Health Check
 app.get('/', (req, res) => {
     res.send('API is running successfully!');
 });
