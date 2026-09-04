@@ -22,3 +22,33 @@ DataDash is a full-stack web application developed for interactive data manageme
 4. *UI Optimization & Theme Management:* 
    - Responsive styling with CSS variables (:root and [data-theme="dark"]).
    - Persistent Dark Mode toggle utilizing localStorage.
+   ## 🚀 Live Demo & Deployment
+
+The full-stack Node.js, Express, and MongoDB application is successfully deployed and running live on Railway.
+
+* *Live API URL:* [https://week-4-mega-project-production.up.railway.app](https://week-4-mega-project-production.up.railway.app)
+* *Hosting Platform:* Railway
+
+---
+
+## 🛠️ Environment Variables Setup
+
+To run this project locally, create a .env file in the root directory and add the following configuration:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_atlas_connection_string
+JWT_SECRET=your_jwt_secret_key
+## ⚙️ Local Installation & Running
+
+1. *Clone the repository:*
+   ```bash
+   git clone [https://github.com/BabyMuskan/week-5-mega-project.git](https://github.com/BabyMuskan/week-5-mega-project.git)
+
+   Install dependencies:
+   npm install
+
+   Run the server:
+   npm start
+
+   
