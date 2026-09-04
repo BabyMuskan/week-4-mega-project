@@ -190,7 +190,7 @@ router.put("/profile/change-password", async (req, res) => {
   }
 });
 
-module.exports = router;
+
 // Update Profile Route
 router.put('/profile', verifyToken, async (req, res) => {
     try {
@@ -243,3 +243,4 @@ router.put('/password', verifyToken, async (req, res) => {
         res.status(500).json({ error: 'Server error while changing password' });
     }
 });
+module.exports = router;
