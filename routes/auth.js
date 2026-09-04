@@ -191,3 +191,55 @@ router.put("/profile/change-password", async (req, res) => {
 });
 
 module.exports = router;
+// Update Profile Route
+router.put('/profile', verifyToken, async (req, res) => {
+    try {
+        const { name, email } = req.body;
+        const userId = req.user.id;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { name, email },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ message: 'Profile updated successfully', user: updatedUser });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error while updating profile' });
+    }
+});
+
+// Change Password Route
+router.put('/password', verifyToken, async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const userId = req.user.id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // 1. Purana password bcrypt se verify karein
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Incorrect old password' });
+        }
+
+        // 2. Naya password hash karein
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // 3. Database mein save karein
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error while changing password' });
+    }
+});

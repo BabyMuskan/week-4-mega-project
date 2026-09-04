@@ -26,23 +26,25 @@
             <p>Interactive Data Overview</p>
         </header>
 
-        <!-- Filter -->
-        <section class="filter-section">
+        <!-- Filter & Search Section -->
+        <section class="filter-section" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <label for="filter">Filter Data:</label>
-
             <select id="filter">
                 <option value="all">All Data</option>
                 <option value="recent">Recent Data</option>
                 <option value="older">Older Data</option>
             </select>
-         <div id="status"></div>
-<div id="loading" class="loading" style="display: none;">
-    Loading data...
-</div>
-<button id="retryBtn" style="display: none;">Retry</button>
-  <button id="applyFilter">Apply Filter</button>
-        </section>
 
+            <!-- Search Input -->
+            <input type="text" id="searchInput" placeholder="Search by name or email..." style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; width: 220px;" />
+
+            <div id="status"></div>
+            <div id="loading" class="loading" style="display: none;">
+                Loading data...
+            </div>
+            <button id="retryBtn" style="display: none;">Retry</button>
+            <button id="applyFilter">Apply Filter</button>
+        </section>
         <!-- Metric Cards -->
         <section class="cards">
 
@@ -68,6 +70,59 @@
     <h2>Data Overview</h2>
     <canvas id="myChart"></canvas>
 </section>  
+<!-- Data Table Section -->
+        <section class="table-container" style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 8px;">
+            <h2>Users / Data Records</h2>
+            <table id="dataTable" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #ddd; text-align: left;">
+                        <th style="padding: 10px;">Name</th>
+                        <th style="padding: 10px;">Email</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Dynamic data yahan load hoga -->
+                </tbody>
+            </table>
+        </section>
+!-- Pagination Controls -->
+        <section class="pagination-section" style="margin-top: 20px; display: flex; align-items: center; gap: 15px; justify-content: center;">
+            <button id="prevBtn" style="padding: 8px 16px; cursor: pointer;">Previous</button>
+            <span id="pageIndicator" style="font-weight: bold;">Page 1</span>
+            <button id="nextBtn" style="padding: 8px 16px; cursor: pointer;">Next</button>
+        </section>
+        <!-- Settings Section -->
+        <section id="settingsSection" class="settings-container" style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 8px;">
+            <h2>Account Settings</h2>
+            
+            <!-- Update Profile Form -->
+            <form id="updateProfileForm" style="margin-top: 15px; margin-bottom: 30px;">
+                <h3>Update Profile</h3>
+                <div style="margin-bottom: 10px;">
+                    <label for="updateName" style="display: block; margin-bottom: 5px;">Name:</label>
+                    <input type="text" id="updateName" required style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 4px;" />
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="updateEmail" style="display: block; margin-bottom: 5px;">Email:</label>
+                    <input type="email" id="updateEmail" required style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 4px;" />
+                </div>
+                <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Changes</button>
+            </form>
+
+            <!-- Change Password Form -->
+            <form id="changePasswordForm">
+                <h3>Change Password</h3>
+                <div style="margin-bottom: 10px;">
+                    <label for="oldPassword" style="display: block; margin-bottom: 5px;">Old Password:</label>
+                    <input type="password" id="oldPassword" required style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 4px;" />
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="newPassword" style="display: block; margin-bottom: 5px;">New Password:</label>
+                    <input type="password" id="newPassword" required style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 4px;" />
+                </div>
+                <button type="submit" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Update Password</button>
+            </form>
+        </section>
   </main>
 <!-- Login Modal UI for Week 3 -->
 <div class="auth-modal-overlay">
